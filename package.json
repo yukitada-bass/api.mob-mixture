@@ -1,0 +1,28 @@
+{
+  "name": "line-webhook",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon webhook.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": "22.14.0"
+  },
+  "dependencies": {
+    "@google-cloud/local-auth": "^2.1.0",
+    "@google-cloud/vision": "^5.1.0",
+    "@line/bot-sdk": "^9.7.3",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "googleapis": "^105.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
