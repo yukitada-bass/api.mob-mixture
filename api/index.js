@@ -16,6 +16,8 @@ const client = new line.messagingApi.MessagingApiClient({
 
 const app = express();
 
+app.get("/", (req, res) => res.send("Express on Vercel"));
+
 app.post("/", line.middleware(config), async (req, res) => {
   const event = req.body.events[0];
   console.log(event);
@@ -114,7 +116,9 @@ app.post("/", line.middleware(config), async (req, res) => {
   res.status(200).end();
 });
 
-// const port = 3000;
-// app.listen(port, () => {
-//   console.log(`listening on ${port}`);
-// });
+const port = 3000;
+app.listen(port, () => {
+  console.log(`listening on ${port}`);
+});
+
+module.exports = app;
