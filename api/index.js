@@ -114,7 +114,7 @@ app.post("/", line.middleware(config), async (req, res) => {
   res.status(200).end();
 });
 
-const port = 3000;
-app.listen(port, () => {
-  console.log(`listening on ${port}`);
-});
+// const port = 3000;
+// app.listen(port, () => {
+//   console.log(`listening on ${port}`);
+// });

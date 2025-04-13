@@ -1,7 +1,11 @@
 // /functions/detectTextFromImage.js
 import { ImageAnnotatorClient } from "@google-cloud/vision";
+import dotenv from "dotenv";
+dotenv.config();
 
-const client = new ImageAnnotatorClient();
+const client = new ImageAnnotatorClient({
+  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
+});
 
 export async function detectTextFromImage(base64Data) {
   try {

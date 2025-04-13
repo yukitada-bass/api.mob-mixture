@@ -1,12 +1,18 @@
 import { google } from "googleapis";
+import dotenv from "dotenv";
+dotenv.config();
 
-const auth = await google.auth.getClient({
-  scopes: ["https://www.googleapis.com/auth/calendar"],
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET
+);
+
+oauth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
 });
 
-const calendar = google.calendar({ version: "v3", auth });
-const calendarId =
-  "93c3b3af2379df3c2f957ca9d48363502b1b996ad8a8b34e40636c28db8673b5@group.calendar.google.com";
+const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+const calendarId = process.env.GOOGLE_CALENDAR_ID;
 
 export const getCalendar = async () => {
   const res = await calendar.events.list({
@@ -25,7 +31,6 @@ export const getCalendar = async () => {
     return `${events[0].summary}
 ${formattedDate}〜`;
   } else {
-    console.log("予定なし");
     return "予定なし";
   }
 };
@@ -46,11 +51,8 @@ export const createCalendar = async (obj) => {
         },
       },
     });
-
-    console.log("作成されたカレンダー：", res.data);
     return `予定に${obj.summary}を追加しました`;
   } catch (err) {
-    console.error("カレンダー作成中にエラーが発生しました:", err);
-    throw err;
+    return "カレンダー作成中にエラーが発生しました";
   }
 };
