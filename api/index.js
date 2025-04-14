@@ -40,7 +40,11 @@ app.post("/", line.middleware(config), async (req, res) => {
     }
   }
   // 画像メッセージ
-  if (event.type === "message" && event.message.type === "image") {
+  if (
+    event.type === "message" &&
+    event.message.type === "image" &&
+    event.source.groupId === process.env.LINE_GROUP_ID
+  ) {
     const imageId = event.message.id;
     const base64Data = await getImageUrl(
       imageId,
