@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { DateTime } from "luxon";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -17,17 +18,17 @@ const calendarId = process.env.GOOGLE_CALENDAR_ID;
 export const getCalendar = async () => {
   const res = await calendar.events.list({
     calendarId: calendarId,
-    timeMin: new Date().toISOString(),
+    timeMin: DateTime.now().setZone("Asia/Tokyo").toISO(),
     maxResults: 1,
     singleEvents: true,
     orderBy: "startTime",
   });
   const events = res.data.items;
   if (events.length) {
-    const date = new Date(events[0].start.dateTime);
-    const formattedDate = `${
-      date.getMonth() + 1
-    }月${date.getDate()}日 ${date.getHours()}時`;
+    const date = DateTime.fromISO(events[0].start.dateTime).setZone(
+      "Asia/Tokyo"
+    );
+    const formattedDate = date.toFormat("M月d日 H時");
     return `${events[0].summary}
 ${formattedDate}〜`;
   } else {
