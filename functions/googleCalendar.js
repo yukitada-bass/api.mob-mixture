@@ -32,7 +32,7 @@ export const getCalendar = async () => {
     return `${events[0].summary}
 ${formattedDate}〜`;
   } else {
-    return "予定なし";
+    return null;
   }
 };
 

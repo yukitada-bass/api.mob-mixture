@@ -21,7 +21,8 @@
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "googleapis": "^105.0.0",
-    "luxon": "^3.6.1"
+    "luxon": "^3.6.1",
+    "microcms-js-sdk": "^3.2.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

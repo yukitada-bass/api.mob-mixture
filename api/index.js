@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { getImageUrl } from "../functions/getImageUrl.js";
 import { detectTextFromImage } from "../functions/detectTextFromImage.js";
 import { getCalendar, createCalendar } from "../functions/googleCalendar.js";
+import { getLive } from "../functions/getLive.js";
 dotenv.config();
 
 const config = {
@@ -26,14 +27,34 @@ app.post("/", line.middleware(config), async (req, res) => {
   // テキストメッセージ
   if (event.type === "message" && event.message.type === "text") {
     const userMessage = event.message.text;
-    if (userMessage.includes("#スタジオ")) {
+    if (userMessage.includes("スタジオ")) {
       const replyText = await getCalendar();
-      await client.replyMessage({
+      replyText && await client.replyMessage({
         replyToken: event.replyToken,
         messages: [
           {
             type: "text",
             text: replyText,
+          },
+        ],
+      });
+    }
+    if (userMessage.includes("ライブ")) {
+      const replyText = await getLive();
+      replyText && await client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [
+          {
+            type: "text",
+            text: replyText[0],
+          },
+          {
+            type: "text",
+            text: `日付\n${replyText[1]}`,
+          },
+          {
+            type: "text",
+            text: `対バン\n${replyText[2]}`,
           },
         ],
       });
