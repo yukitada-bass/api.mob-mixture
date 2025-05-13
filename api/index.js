@@ -26,7 +26,7 @@ app.post("/", line.middleware(config), async (req, res) => {
   // テキストメッセージ
   if (event.type === "message" && event.message.type === "text") {
     const userMessage = event.message.text;
-    if (userMessage.includes("スタジオ")) {
+    if (userMessage.includes("#スタジオ")) {
       const replyText = await getCalendar();
       await client.replyMessage({
         replyToken: event.replyToken,
@@ -63,7 +63,7 @@ app.post("/", line.middleware(config), async (req, res) => {
       const day = dateMatch[3];
 
       // 時刻パース
-      const timeMatch = detectText.match(/(\d{2}) ?(\d{2})~(\d{2}):(\d{2})/);
+      const timeMatch = detectText.match(/(\d{2}):(\d{2}) ?(\d{2}):(\d{2})/);
       const startHour = timeMatch[1];
       const startMinute = timeMatch[2];
       const endHour = timeMatch[3];
