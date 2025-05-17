@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import { getImageUrl } from "../functions/getImageUrl.js";
 import { detectTextFromImage } from "../functions/detectTextFromImage.js";
 import { getCalendar, createCalendar } from "../functions/googleCalendar.js";
-import { getLive } from "../functions/getLive.js";
+import { getLiveSchedules } from "../functions/getLiveSchedules.js";
 dotenv.config();
 
 const config = {
@@ -24,37 +24,33 @@ app.post("/", line.middleware(config), async (req, res) => {
   console.log(event);
   // テスト用
   if (event === undefined) return res.status(200).end();
+
   // テキストメッセージ
   if (event.type === "message" && event.message.type === "text") {
     const userMessage = event.message.text;
-    if (userMessage.includes("スタジオ")) {
+    if (userMessage.includes("スタジオいつやっけ")) {
       const replyText = await getCalendar();
-      replyText && await client.replyMessage({
-        replyToken: event.replyToken,
-        messages: [
-          {
-            type: "text",
-            text: replyText,
-          },
-        ],
-      });
+      replyText &&
+        (await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [
+            {
+              type: "text",
+              text: replyText,
+            },
+          ],
+        }));
     }
-    if (userMessage.includes("ライブ")) {
-      const replyText = await getLive();
-      replyText && await client.replyMessage({
+    if (userMessage.includes("#ライブスケジュール")) {
+      const flexMessage = await getLiveSchedules();
+      flexMessage &&
+      await client.replyMessage({
         replyToken: event.replyToken,
         messages: [
           {
-            type: "text",
-            text: replyText[0],
-          },
-          {
-            type: "text",
-            text: `日付\n${replyText[1]}`,
-          },
-          {
-            type: "text",
-            text: `対バン\n${replyText[2]}`,
+            type: "flex",
+            altText: "ライブスケジュール",
+            contents: flexMessage,
           },
         ],
       });
@@ -72,7 +68,7 @@ app.post("/", line.middleware(config), async (req, res) => {
       process.env.LINE_ACCESS_TOKEN
     );
     const detectText = await detectTextFromImage(base64Data);
-    console.log(detectText);
+
     // createCalendar関数に渡す引数の初期化
     let obj = {};
 
@@ -124,6 +120,7 @@ app.post("/", line.middleware(config), async (req, res) => {
         end: endISO,
       };
     }
+
     // オブジェクトが空かどうか
     if (Object.keys(obj).length > 0) {
       const res = await createCalendar(obj);
