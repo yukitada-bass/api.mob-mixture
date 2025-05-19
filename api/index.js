@@ -44,13 +44,79 @@ app.post("/", line.middleware(config), async (req, res) => {
     if (userMessage.includes("#ライブスケジュール")) {
       const flexMessage = await getLiveSchedules();
       flexMessage &&
+        (await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [
+            {
+              type: "flex",
+              altText: "ライブスケジュール",
+              contents: flexMessage,
+            },
+          ],
+        }));
+    }
+  }
+  // postback
+  if (event.type === "postback") {
+    const data = event.postback.data;
+    if (data.includes("reserve=")) {
       await client.replyMessage({
         replyToken: event.replyToken,
         messages: [
           {
-            type: "flex",
-            altText: "ライブスケジュール",
-            contents: flexMessage,
+            type: "text",
+            text: "予約枚数を選択してください",
+            quickReply: {
+              items: [
+                {
+                  type: "action",
+                  action: {
+                    type: "postback",
+                    label: "1枚",
+                    data: "number=1",
+                    displayText: "1枚",
+                  },
+                },
+                {
+                  type: "action",
+                  action: {
+                    type: "postback",
+                    label: "2枚",
+                    data: "number=2",
+                    displayText: "2枚",
+                  },
+                },
+                {
+                  type: "action",
+                  action: {
+                    type: "postback",
+                    label: "3枚",
+                    data: "number=3",
+                    displayText: "3枚",
+                  },
+                },
+                {
+                  type: "action",
+                  action: {
+                    type: "postback",
+                    label: "4枚",
+                    data: "number=4",
+                    displayText: "4枚",
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      });
+    }
+    if (data.includes("number=")) {
+      await client.replyMessage({
+        replyToken: event.replyToken,
+        messages: [
+          {
+            type: "text",
+            text: "お名前を入力してください",
           },
         ],
       });
@@ -135,7 +201,6 @@ app.post("/", line.middleware(config), async (req, res) => {
       });
     }
   }
-  res.status(200).end();
 });
 
 const port = 3000;

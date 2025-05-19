@@ -12,7 +12,7 @@ export async function getLiveSchedules() {
     endpoint: "schedules",
   });
 
-  if(!contents || contents.length === 0) {
+  if (!contents || contents.length === 0) {
     return null;
   }
 
@@ -84,6 +84,23 @@ function generateFlexMessageFromSchedules(contents) {
             text: `🎫 ${price}`,
             size: "sm",
             color: "#666666",
+          },
+        ],
+      },
+      footer: {
+        type: "box",
+        layout: "vertical",
+        spacing: "sm",
+        contents: [
+          {
+            type: "button",
+            style: "primary",
+            height: "sm",
+            action: {
+              type: "postback",
+              label: "チケット予約",
+              data: `reserve=${item.title}`,
+            },
           },
         ],
       },
