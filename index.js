@@ -1,10 +1,12 @@
 import * as line from "@line/bot-sdk";
 import express from "express";
 import dotenv from "dotenv";
-import { getImageUrl } from "../functions/getImageUrl.js";
-import { detectTextFromImage } from "../functions/detectTextFromImage.js";
-import { getCalendar, createCalendar } from "../functions/googleCalendar.js";
-import { getLiveSchedules } from "../functions/getLiveSchedules.js";
+import cors from "cors";
+import nodemailer from "nodemailer";
+import { getImageUrl } from "./functions/getImageUrl.js";
+import { detectTextFromImage } from "./functions/detectTextFromImage.js";
+import { getCalendar, createCalendar } from "./functions/googleCalendar.js";
+import { getLiveSchedules } from "./functions/getLiveSchedules.js";
 dotenv.config();
 
 const config = {
@@ -15,11 +17,32 @@ const client = new line.messagingApi.MessagingApiClient({
   channelAccessToken: process.env.LINE_ACCESS_TOKEN,
 });
 
+// 1. SMTPトランスポートを作成
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
 const app = express();
 
-app.get("/", (req, res) => res.send("Express on Vercel"));
+app.use(
+  cors({
+    origin: "https://mob-mixture.com",
+    // origin: "http://localhost:4321",
+    methods: "POST",
+    credentials: true,
+  })
+);
 
-app.post("/", line.middleware(config), async (req, res) => {
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.post("/webhook", line.middleware(config), async (req, res) => {
   const event = req.body.events[0];
   console.log(event);
   // テスト用
@@ -123,16 +146,9 @@ app.post("/", line.middleware(config), async (req, res) => {
     }
   }
   // 画像メッセージ
-  if (
-    event.type === "message" &&
-    event.message.type === "image" &&
-    event.source.groupId === process.env.LINE_GROUP_ID
-  ) {
+  if (event.type === "message" && event.message.type === "image" && event.source.groupId === process.env.LINE_GROUP_ID) {
     const imageId = event.message.id;
-    const base64Data = await getImageUrl(
-      imageId,
-      process.env.LINE_ACCESS_TOKEN
-    );
+    const base64Data = await getImageUrl(imageId, process.env.LINE_ACCESS_TOKEN);
     const detectText = await detectTextFromImage(base64Data);
 
     // createCalendar関数に渡す引数の初期化
@@ -165,9 +181,7 @@ app.post("/", line.middleware(config), async (req, res) => {
 
     if (detectText.includes("shibutani") || detectText.includes("5850")) {
       // 日時パース
-      const match = detectText.match(
-        /(\d{4})年(\d{1,2})月(\d{1,2})日 \([^\)]+\) (\d{2}):(\d{2}) ~/
-      );
+      const match = detectText.match(/(\d{4})年(\d{1,2})月(\d{1,2})日 \([^\)]+\) (\d{2}):(\d{2}) ~/);
       const year = match[1];
       const month = String(match[2]).padStart(2, "0"); // 月を2桁に
       const day = String(match[3]).padStart(2, "0"); // 日を2桁に
@@ -203,9 +217,53 @@ app.post("/", line.middleware(config), async (req, res) => {
   }
 });
 
+app.post("/form", async (req, res) => {
+  const reserve = `ホームページから予約がありました。
+日時: ${req.body.formattedDate}
+予約枚数: ${req.body.sheetCount}
+お名前: ${req.body.name}
+メールアドレス: ${req.body.email}`;
+
+  try {
+    // await client.pushMessage(process.env.LINE_GROUP_ID, [
+    //   {
+    //     type: "text",
+    //     text: reserve,
+    //   },
+    // ]);
+    // await fetch("https://api.line.me/v2/bot/message/push", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${process.env.LINE_ACCESS_TOKEN}`,
+    //   },
+    //   body: JSON.stringify({
+    //     to: process.env.LINE_GROUP_ID,
+    //     messages: [
+    //       {
+    //         type: "text",
+    //         text: reserve,
+    //       },
+    //     ],
+    //   }),
+    // });
+    // 2. メール送信
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: req.body.email,
+      subject: "ご予約ありがとうございます",
+      text: reserve,
+    };
+
+    // await transporter.sendMail(mailOptions);
+
+    res.send("OK");
+  } catch (err) {
+    res.send("Error");
+  }
+});
+
 const port = 3000;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });
-
-export default app;

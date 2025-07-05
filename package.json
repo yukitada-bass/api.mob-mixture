@@ -5,26 +5,28 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon api/index.js"
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
-  "engines": {
-    "node": "22.14.0"
-  },
   "dependencies": {
     "@google-cloud/local-auth": "^2.1.0",
     "@google-cloud/vision": "^5.1.0",
-    "@line/bot-sdk": "^9.7.3",
+    "@line/bot-sdk": "^10.0.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
     "googleapis": "^105.0.0",
     "luxon": "^3.6.1",
-    "microcms-js-sdk": "^3.2.0"
+    "microcms-js-sdk": "^3.2.0",
+    "nodemailer": "^7.0.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
+  },
+  "volta": {
+    "node": "22.14.0"
   }
 }
