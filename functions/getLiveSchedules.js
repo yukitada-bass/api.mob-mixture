@@ -17,32 +17,24 @@ export async function getLiveSchedules() {
   }
 
   const flexMessage = generateFlexMessageFromSchedules(contents);
-  // console.log(JSON.stringify(flexMessage, null, 2));
-
+  console.log(JSON.stringify(flexMessage, null, 2));
   return flexMessage;
 }
-
-getLiveSchedules();
 
 function generateFlexMessageFromSchedules(contents) {
   const bubbles = contents.map((item) => {
     const date = new Date(item.date);
-    const formattedDate = `${date.getMonth() + 1}月${date.getDate()}日 (${
-      ["日", "月", "火", "水", "木", "金", "土"][date.getDay()]
-    }) ${item.start}開演`;
+    const formattedDate = `${date.getMonth() + 1}月${date.getDate()}日 (${["日", "月", "火", "水", "木", "金", "土"][date.getDay()]}) ${item.start}開演`;
 
-    const place = item.place?.[0] || "";
+    const venue = item.venue?.[0] || "";
     const artists = item.with?.replace(/\n/g, " / ");
-    const price =
-      item.adv === item.door
-        ? `前売/当日: ¥${item.adv}`
-        : `前売: ¥${item.adv} / 当日: ¥${item.door}`;
+    const price = item.adv === item.door ? `前売/当日: ¥${item.adv}` : `前売: ¥${item.adv} / 当日: ¥${item.door}`;
 
     return {
       type: "bubble",
       hero: {
         type: "image",
-        url: item.image?.url,
+        url: item.image?.url ?? "https://example.com/default-image.jpg",
         size: "full",
         aspectRatio: "3:4",
         aspectMode: "cover",
@@ -61,7 +53,7 @@ function generateFlexMessageFromSchedules(contents) {
           },
           {
             type: "text",
-            text: `📍${place}`,
+            text: `📍${venue}`,
             size: "sm",
             color: "#666666",
             wrap: true,
@@ -100,6 +92,7 @@ function generateFlexMessageFromSchedules(contents) {
               type: "postback",
               label: "チケット予約",
               data: `reserve=${item.title}`,
+              displayText: "チケット予約",
             },
           },
         ],

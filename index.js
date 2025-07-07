@@ -66,6 +66,7 @@ app.post("/webhook", line.middleware(config), async (req, res) => {
     }
     if (userMessage.includes("#ライブスケジュール")) {
       const flexMessage = await getLiveSchedules();
+      console.log(flexMessage);
       flexMessage &&
         (await client.replyMessage({
           replyToken: event.replyToken,
