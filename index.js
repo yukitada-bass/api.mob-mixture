@@ -7,7 +7,28 @@ import { getImageUrl } from "./functions/getImageUrl.js";
 import { detectTextFromImage } from "./functions/detectTextFromImage.js";
 import { getCalendar, createCalendar } from "./functions/googleCalendar.js";
 import { getLiveSchedules } from "./functions/getLiveSchedules.js";
+import sqlite3 from "better-sqlite3";
 dotenv.config();
+
+// SQLiteデータベースの初期化
+const db = new sqlite3("./ticket.db");
+
+db.prepare(
+  `
+  CREATE TABLE IF NOT EXISTS user_states (
+    step BOOLEAN DEFAULT false,
+    userId TEXT PRIMARY KEY,
+    tickets TEXT,
+    number INTEGER,
+    name TEXT
+  )
+`
+).run();
+
+// ステートメントを事前に準備
+const insertUserState = db.prepare("INSERT OR REPLACE INTO user_states (userId, tickets) VALUES (?, ?)");
+const updateUserState = db.prepare("UPDATE user_states SET number = ?, step = ? WHERE userId = ?");
+const selectUserState = db.prepare("SELECT step FROM user_states WHERE userId = ?");
 
 const config = {
   channelSecret: process.env.LINE_CHANNEL_SECRET,
@@ -48,6 +69,7 @@ app.post("/webhook", line.middleware(config), async (req, res) => {
   // テスト用
   if (event === undefined) return res.status(200).end();
 
+  const userId = event?.source?.userId;
   // テキストメッセージ
   if (event.type === "message" && event.message.type === "text") {
     const userMessage = event.message.text;
@@ -64,7 +86,7 @@ app.post("/webhook", line.middleware(config), async (req, res) => {
           ],
         }));
     }
-    if (userMessage.includes("#ライブスケジュール")) {
+    if (userMessage === "#ライブスケジュール") {
       const flexMessage = await getLiveSchedules();
       console.log(flexMessage);
       flexMessage &&
@@ -79,6 +101,21 @@ app.post("/webhook", line.middleware(config), async (req, res) => {
           ],
         }));
     }
+    // 最終チェック
+    setTimeout(async function () {
+      const row = selectUserState.get(userId);
+      if (row && row.step === 1) {
+        await client.replyMessage({
+          replyToken: event.replyToken,
+          messages: [
+            {
+              type: "text",
+              text: "ご予約ありがとうございます。",
+            },
+          ],
+        });
+      }
+    }, 1000);
   }
   // postback
   if (event.type === "postback") {
@@ -133,6 +170,8 @@ app.post("/webhook", line.middleware(config), async (req, res) => {
           },
         ],
       });
+      const tickets = data.split("=")[1];
+      insertUserState.run(userId, tickets);
     }
     if (data.includes("number=")) {
       await client.replyMessage({
@@ -144,6 +183,10 @@ app.post("/webhook", line.middleware(config), async (req, res) => {
           },
         ],
       });
+      const userId = event.source.userId;
+      const number = data.split("=")[1];
+      const step = 1; // ステップを1に設定
+      updateUserState.run(parseInt(number, 10), step, userId);
     }
   }
   // 画像メッセージ
