@@ -1,6 +1,4 @@
 import { createClient } from "microcms-js-sdk";
-import dotenv from "dotenv";
-dotenv.config();
 
 export async function getLiveSchedules() {
   const client = createClient({
@@ -16,9 +14,7 @@ export async function getLiveSchedules() {
     return null;
   }
 
-  const flexMessage = generateFlexMessageFromSchedules(contents);
-  console.log(JSON.stringify(flexMessage, null, 2));
-  return flexMessage;
+  return generateFlexMessageFromSchedules(contents);
 }
 
 function generateFlexMessageFromSchedules(contents) {
