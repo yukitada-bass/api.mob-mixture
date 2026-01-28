@@ -20,6 +20,7 @@ jobs:
           username: yukitada
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            export PATH=$PATH:/home/yukitada/.volta/bin
             cd /home/yukitada/line-webhook
             git pull
             pm2 reload line-webhook
