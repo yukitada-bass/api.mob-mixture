@@ -29,7 +29,7 @@ export default async function handleTextMessage(replyToken,userMessage) {
       ],
     });
   }
-  if (userMessage.includes("スタジオいつやっけ")) {
+  if (userMessage.includes("スタジオいつ")) {
     const replyText = await getCalendar();
     replyText &&
       (await client.replyMessage({
