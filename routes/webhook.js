@@ -17,7 +17,8 @@ router.post("/", line.middleware(config), async (req, res) => {
     case "message":
       if (event.message.type === "text") {
         const userMessage = event.message.text;
-        await handleTextMessage(replyToken, userMessage);
+        const userId = event.source.userId;
+        await handleTextMessage(replyToken, userMessage, userId);
       }
       if (event.message.type === "image") {
         const imageId = event.message.id;
