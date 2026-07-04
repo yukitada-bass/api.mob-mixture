@@ -1,6 +1,11 @@
+import { client } from "../../lib/line.js";
 import { getTickets, insertUserState, updateUserState } from "../../lib/db.js";
 
 export default async function handlePostback(replyToken, userId, data) {
+  if (!userId) {
+    return;
+  }
+
   if (data.includes("reserve=")) {
     await client.replyMessage({
       replyToken,
@@ -52,7 +57,7 @@ export default async function handlePostback(replyToken, userId, data) {
       ],
     });
     const tickets = data.split("=")[1];
-    insertUserState.run(userId, tickets);
+    await insertUserState(userId, tickets);
   }
   if (data.includes("number=")) {
     await client.replyMessage({
@@ -65,12 +70,12 @@ export default async function handlePostback(replyToken, userId, data) {
       ],
     });
     const number = data.split("=")[1];
-    const step = 1; // ステップを1に設定
-    updateUserState.run(parseInt(number, 10), step, userId);
+    const step = true; // ステップを有効に設定
+    await updateUserState(parseInt(number, 10), step, userId);
   }
   if (data.includes("select=")) {
     const tickets = data.split("=")[1];
-    const list = getTickets.all(tickets);
+    const list = await getTickets(tickets);
     console.log(list);
   }
 }
